@@ -1,0 +1,31 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # No ports: — Dokploy/Traefik handles external routing.
+    # Expose container port for Traefik service discovery:
+    expose:
+      - "8765"
+    environment:
+      - TZ=UTC
+      # Override these in Dokploy UI → Environment tab.
+      # UI vars are written to .env alongside compose.
+      # Reference them with ${VAR_NAME} or use env_file: .env
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8765/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: "256M"
+        reservations:
+          cpus: "0.1"
+          memory: "64M"
+      restart_policy:
+        condition: unless-stopped
+        delay: 5s
